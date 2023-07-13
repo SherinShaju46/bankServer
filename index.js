@@ -11,6 +11,11 @@ app.listen(3000, () => {[]
 })
 //**server creation ends */
 
+//integrate frontend with server
+const cors= require('cors');
+app.use(cors({origin:"http://localhost:4200"}))
+
+
 //import logic.js file
 const logic= require('./service/logic');
 
