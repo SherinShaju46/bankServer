@@ -6,25 +6,24 @@ const express = require('express');
 const app = express()
 
 //port set
-app.listen(3000, () => {[]
+app.listen(3000, () => {
    console.log("server started at port 3000");
 })
 //**server creation ends */
 
 //integrate frontend with server
-const cors= require('cors');
-app.use(cors({origin:"http://localhost:4200"}))
-
+const cors = require('cors');
+app.use(cors({ origin: "http://localhost:4200" }))
 
 //import logic.js file
-const logic= require('./service/logic');
+const logic = require('./service/logic');
 
 //to convert all incoming json data to js
 app.use(express.json())
 
 //incoming requests
 //post request
-app.post('/register', (req, res)=>{
+app.post('/register', (req, res) => {
    // console.log(req.body.acno);
    // res.send("post method worked")
    logic.register(req.body.acno, req.body.uname, req.body.psw).then(result => {
@@ -35,6 +34,13 @@ app.post('/register', (req, res)=>{
 //login request
 app.post('/login', (req, res) => {
    logic.login(req.body.acno, req.body.psw).then(result => {
+      res.status(result.statusCode).json(result)
+   })
+})
+
+//balance check
+app.get('/balance/:acno', (req, res) => {
+   logic.getBalance(req.params.acno).then(result => {
       res.status(result.statusCode).json(result)
    })
 })
