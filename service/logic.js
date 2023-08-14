@@ -55,6 +55,7 @@ login = (acno, psw) => {
     })
 }
 
+//function to check balance
 getBalance = (acno) => {
     return db.User.findOne({ acno }).then(user => {
         if (user) {
@@ -73,7 +74,88 @@ getBalance = (acno) => {
         }
     })
 }
+
+//to get user details
+getUser = (acno) => {
+    return db.User.findOne({ acno }).then(user => {
+        if (user) {
+            return {
+                message: user,
+                status: true,
+                statusCode: 200
+            }
+        }
+        else {
+            return {
+                message: "incorrect acno",
+                status: false,
+                statusCode: 401
+            }
+        }
+    })
+}
+
+//function to transfer money and update balance
+fundTransfer = (toAcno, fromAcno, amount, psw, date) => {
+    let amnt = parseInt(amount)
+    return db.User.findOne({ acno: fromAcno, psw }).then(fromUser => {
+        if (fromUser) {
+            return db.User.findOne({ acno: toAcno }).then(toUser => {
+                if (toUser) {
+                    if (amnt > fromUser.balance) {
+                        return {
+                            message: "insufficient balance",
+                            status: false,
+                            statusCode: 405
+                        }
+                    }
+                    else {
+                        fromUser.balance -= amnt
+                        fromUser.transactions.push({
+                            type: 'DEBIT',
+                            to: toUser.acno,
+                            amount: amnt,
+                            date
+                        })
+                        fromUser.save()
+
+                        toUser.balance += amnt
+                        toUser.transactions.push({
+                            type: 'CREDIT',
+                            from: fromUser.acno,
+                            amount: amnt,
+                            date
+                        })
+                        toUser.save()
+
+                        return {
+                            message: "transaction success",
+                            status: true,
+                            statusCode: 200,
+                            balance: fromUser.balance
+                        }
+                    }
+                }
+                else {
+                    return {
+                        message: "invalid to account credentials",
+                        status: false,
+                        statusCode: 404
+                    }
+                }
+            })
+        }
+        else {
+            return {
+                message: "invalid acno or password",
+                status: false,
+                statusCode: 404
+            }
+        }
+    })
+}
+
 //export function
 module.exports = {
-    register, login, getBalance
+    register, login, getBalance, getUser, fundTransfer
 }
