@@ -1,6 +1,9 @@
 //import db.js file to get db details here
 const db = require('./db.js')
 
+//import jwt 
+const jwt= require('jsonwebtoken')
+
 //create a function for register logic
 register = (acno, uname, psw) => {
     //collection key:arg
@@ -37,12 +40,15 @@ register = (acno, uname, psw) => {
 login = (acno, psw) => {
     return db.User.findOne({ acno, psw }).then(user => {
         if (user) {
+            //token generation
+            const token= jwt.sign({currentAcno:acno}, "secretkey123")
             return {
                 message: "login successful",
                 status: true,
                 statusCode: 200,
                 currentUser: user.uname,
-                currentAcno: user.acno
+                currentAcno: user.acno,
+                token
             }
         }
         else {
@@ -115,7 +121,8 @@ fundTransfer = (toAcno, fromAcno, amount, psw, date) => {
                             type: 'DEBIT',
                             to: toUser.acno,
                             amount: amnt,
-                            date
+                            date,
+                            balance: fromUser.balance
                         })
                         fromUser.save()
 
@@ -124,7 +131,8 @@ fundTransfer = (toAcno, fromAcno, amount, psw, date) => {
                             type: 'CREDIT',
                             from: fromUser.acno,
                             amount: amnt,
-                            date
+                            date,
+                            balance: toUser.balance
                         })
                         toUser.save()
 
@@ -155,7 +163,27 @@ fundTransfer = (toAcno, fromAcno, amount, psw, date) => {
     })
 }
 
+//transaction history
+getTransaction = (acno) => {
+    return db.User.findOne({acno}).then(user => {
+        if(user){
+            return {
+                message: user.transactions,
+                status: true,
+                statusCode: 200
+            }
+        }
+        else{
+            return{
+                message: "invalid user",
+                status: false,
+                statusCode: 404
+            }
+        }
+    })
+}
+
 //export function
 module.exports = {
-    register, login, getBalance, getUser, fundTransfer
+    register, login, getBalance, getUser, fundTransfer, getTransaction
 }
