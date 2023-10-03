@@ -183,7 +183,26 @@ getTransaction = (acno) => {
     })
 }
 
+deleteAcc = (acno) => {
+    return db.User.deleteOne({acno}).then(deleteCount => {
+        if(deleteCount){
+            return{
+                message: "User deleted successfully",
+                status: true,
+                statusCode: 200
+            }
+        }
+        else{
+            return{
+                message: "invalid user",
+                status: false,
+                statusCode: 404
+            }
+        }
+    })
+}
+
 //export function
 module.exports = {
-    register, login, getBalance, getUser, fundTransfer, getTransaction
+    register, login, getBalance, getUser, fundTransfer, getTransaction, deleteAcc
 }

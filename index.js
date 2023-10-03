@@ -35,7 +35,7 @@ const jwtMiddleware = (req, res, next) => {
       //compiler to come out of function
       next()
    }
-   catch{
+   catch {
       res.status(404).json(
          {
             statusCode: 404,
@@ -93,6 +93,13 @@ app.post('/transfer', jwtMiddleware, (req, res) => {
 //transaction history
 app.get('/transaction/:acno', jwtMiddleware, (req, res) => {
    logic.getTransaction(req.params.acno).then(result => {
+      res.status(result.statusCode).json(result)
+   })
+})
+
+//delete account
+app.delete('/deleteacc/:acno', jwtMiddleware, (req, res) => {
+   logic.deleteAcc(req.params.acno).then(result => {
       res.status(result.statusCode).json(result)
    })
 })
